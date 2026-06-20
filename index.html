@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OficioYa — Encuentra trabajadores operativos rápido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --asphalt:#1C1B19;
+    --asphalt-2:#262420;
+    --asphalt-3:#312E29;
+    --concrete:#F4F0E8;
+    --concrete-dim:#DCD5C6;
+    --orange:#FF6A13;
+    --yellow:#FFC600;
+    --steel:#3C5A6B;
+    --green:#4C9A6A;
+    --amber:#E0A526;
+    --red:#C9533A;
+    --line: rgba(244,240,232,0.14);
+    --radius: 4px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--asphalt);
+    color:var(--concrete);
+    font-family:'Archivo', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  h1,h2,h3{
+    font-family:'Archivo Black', sans-serif;
+    text-transform:uppercase;
+    margin:0;
+    letter-spacing:0.01em;
+  }
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+
+  /* hazard stripe */
+  .hazard{
+    height:10px;
+    background:repeating-linear-gradient(135deg, var(--yellow) 0 16px, var(--asphalt) 16px 32px);
+  }
+
+  /* ===== NAV ===== */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:var(--asphalt);
+    border-bottom:1px solid var(--line);
+  }
+  .navbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 28px;max-width:1180px;margin:0 auto;
+  }
+  .logo{
+    display:flex;align-items:center;gap:10px;font-size:22px;
+  }
+  .logo .badge{
+    background:var(--orange);color:var(--asphalt);
+    font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:10px;
+    padding:3px 7px;border-radius:3px;letter-spacing:0.06em;
+    transform:rotate(-3deg);
+  }
+  nav.links{display:flex;gap:28px;font-size:14px;font-weight:600;}
+  nav.links a{
+    color:var(--concrete-dim);transition:color .15s;
+    padding:6px 0;border-bottom:2px solid transparent;
+  }
+  nav.links a:hover{color:var(--yellow);border-color:var(--yellow);}
+  .nav-toggle{display:none;background:none;border:1px solid var(--line);color:var(--concrete);padding:8px 10px;border-radius:4px;cursor:pointer;font-size:18px;}
+
+  /* ===== HERO ===== */
+  .hero{
+    padding:88px 0 72px;
+    background:
+      radial-gradient(circle at 85% 0%, rgba(255,106,19,0.12), transparent 55%),
+      var(--asphalt);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-grid{
+    display:grid;grid-template-columns:1.1fr 0.9fr;gap:56px;align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.12em;
+    color:var(--yellow);text-transform:uppercase;margin-bottom:18px;
+  }
+  .eyebrow::before{content:'';width:8px;height:8px;background:var(--yellow);border-radius:50%;display:inline-block;}
+  .hero h1{
+    font-size:clamp(36px,5.2vw,58px);
+    line-height:1.04;
+    color:var(--concrete);
+  }
+  .hero h1 span{color:var(--orange);}
+  .hero p.sub{
+    font-size:17px;color:var(--concrete-dim);max-width:480px;
+    margin:20px 0 32px;line-height:1.55;
+  }
+  .cta-row{display:flex;gap:16px;flex-wrap:wrap;}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:0.02em;
+    padding:15px 24px;border-radius:var(--radius);border:2px solid transparent;
+    cursor:pointer;transition:transform .12s, box-shadow .12s;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--orange);color:var(--asphalt);}
+  .btn-primary:hover{box-shadow:0 0 0 3px rgba(255,106,19,0.35);}
+  .btn-secondary{background:transparent;border-color:var(--concrete-dim);color:var(--concrete);}
+  .btn-secondary:hover{border-color:var(--yellow);color:var(--yellow);}
+  .btn-ghost{background:var(--asphalt-2);color:var(--concrete);border-color:var(--line);}
+  .btn-ghost:hover{border-color:var(--yellow);}
+
+  /* hero ticket visual */
+  .ticket-stack{position:relative;height:340px;}
+  .ticket-demo{
+    position:absolute;width:300px;
+    background:var(--asphalt-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:18px 18px 16px;
+    box-shadow:0 18px 40px rgba(0,0,0,0.45);
+  }
+  .ticket-demo.back{top:36px;left:48px;transform:rotate(-6deg);opacity:0.55;}
+  .ticket-demo.front{top:0;left:0;transform:rotate(2deg);}
+  .ticket-demo .row1{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+  .avatar{
+    width:46px;height:46px;border-radius:6px;background:var(--steel);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-family:'Archivo Black';font-size:16px;color:var(--concrete);
+  }
+  .stamp{
+    font-family:'IBM Plex Mono';font-size:10px;font-weight:600;text-transform:uppercase;
+    padding:4px 8px;border-radius:3px;border:1.5px solid var(--green);color:var(--green);
+    transform:rotate(-4deg);letter-spacing:0.06em;
+  }
+  .ticket-demo h4{font-family:'Archivo Black';font-size:16px;color:var(--concrete);margin:0 0 2px;}
+  .ticket-demo .role{color:var(--orange);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px;}
+  .ticket-meta{display:flex;gap:14px;font-size:12px;color:var(--concrete-dim);font-family:'IBM Plex Mono';flex-wrap:wrap;}
+
+  /* ===== SECTION HEADERS ===== */
+  .section{padding:84px 0;}
+  .section-tag{
+    font-family:'IBM Plex Mono';font-size:12px;color:var(--orange);
+    letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;display:block;
+  }
+  .section h2{font-size:clamp(26px,3.4vw,38px);margin-bottom:14px;}
+  .section .lead{color:var(--concrete-dim);max-width:580px;font-size:16px;line-height:1.6;}
+
+  .alt{background:var(--asphalt-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+
+  /* ===== COMO FUNCIONA ===== */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px;}
+  .step{
+    background:var(--asphalt);border:1px solid var(--line);border-radius:6px;padding:26px 22px;
+    position:relative;
+  }
+  .step .num{
+    font-family:'IBM Plex Mono';font-weight:600;color:var(--yellow);font-size:13px;
+    letter-spacing:0.08em;display:block;margin-bottom:14px;
+  }
+  .step h3{font-size:18px;margin-bottom:8px;}
+  .step p{color:var(--concrete-dim);font-size:14px;line-height:1.55;margin:0;}
+
+  /* ===== OFICIOS ===== */
+  .oficios-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:42px;}
+  .oficio-chip{
+    background:var(--asphalt);border:1px solid var(--line);border-radius:6px;
+    padding:20px 12px;text-align:center;transition:border-color .15s, transform .15s;cursor:default;
+  }
+  .oficio-chip:hover{border-color:var(--orange);transform:translateY(-3px);}
+  .oficio-chip svg{width:28px;height:28px;stroke:var(--yellow);margin-bottom:10px;}
+  .oficio-chip span{display:block;font-size:13px;font-weight:600;}
+
+  /* ===== BUSCADOR ===== */
+  .filters{
+    display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;
+    background:var(--asphalt);border:1px solid var(--line);border-radius:8px;
+    padding:22px;margin-top:38px;
+  }
+  .field{display:flex;flex-direction:column;gap:6px;min-width:160px;flex:1;}
+  .field label{
+    font-family:'IBM Plex Mono';font-size:11px;color:var(--concrete-dim);
+    text-transform:uppercase;letter-spacing:0.08em;
+  }
+  select{
+    background:var(--asphalt-2);color:var(--concrete);border:1px solid var(--line);
+    border-radius:4px;padding:11px 12px;font-family:'Archivo';font-size:14px;font-weight:600;
+    cursor:pointer;
+  }
+  select:focus{outline:2px solid var(--yellow);outline-offset:1px;}
+  .filters .btn{flex:0 0 auto;align-self:flex-end;height:44px;padding:0 22px;}
+
+  .results-meta{display:flex;justify-content:space-between;align-items:center;margin:28px 0 18px;}
+  .results-count{font-family:'IBM Plex Mono';font-size:13px;color:var(--concrete-dim);}
+  .results-count b{color:var(--yellow);}
+
+  .cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .card{
+    background:var(--asphalt);border:1px solid var(--line);border-radius:8px;
+    padding:22px;position:relative;
+    transition:border-color .15s, transform .15s;
+  }
+  .card:hover{border-color:var(--orange);transform:translateY(-2px);}
+  .card::before{ /* perforation notches */
+    content:'';position:absolute;left:-7px;top:50%;width:14px;height:14px;
+    background:var(--asphalt-2);border-radius:50%;border:1px solid var(--line);
+  }
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+  .card-id{display:flex;gap:12px;align-items:center;}
+  .card h4{font-family:'Archivo Black';font-size:17px;margin:0;}
+  .card .role{color:var(--orange);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;margin-top:2px;}
+  .avail{
+    font-family:'IBM Plex Mono';font-size:10px;font-weight:600;text-transform:uppercase;
+    padding:4px 8px;border-radius:3px;letter-spacing:0.05em;white-space:nowrap;
+  }
+  .avail.now{border:1.5px solid var(--green);color:var(--green);}
+  .avail.week{border:1.5px solid var(--amber);color:var(--amber);}
+  .avail.later{border:1.5px solid var(--red);color:var(--red);}
+  .card-meta{
+    display:flex;flex-direction:column;gap:7px;margin:14px 0 18px;
+    font-size:13px;color:var(--concrete-dim);
+  }
+  .card-meta div{display:flex;gap:8px;align-items:center;}
+  .card-meta svg{width:14px;height:14px;stroke:var(--concrete-dim);flex-shrink:0;}
+  .card-actions{display:flex;gap:10px;}
+  .card-actions .btn{flex:1;padding:11px 14px;font-size:12.5px;justify-content:center;}
+  .btn-sm-outline{background:transparent;border:1.5px solid var(--line);color:var(--concrete-dim);}
+  .btn-sm-outline:hover{border-color:var(--yellow);color:var(--yellow);}
+
+  .empty-state{
+    text-align:center;padding:60px 20px;color:var(--concrete-dim);
+    border:1px dashed var(--line);border-radius:8px;font-family:'IBM Plex Mono';font-size:13px;
+  }
+
+  /* ===== CTA RECLUTADOR/TRABAJADOR strip ===== */
+  .strip{
+    display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:0;
+  }
+  .strip .panel{
+    border-radius:8px;padding:34px;border:1px solid var(--line);
+  }
+  .strip .panel.work{background:linear-gradient(135deg, var(--asphalt-2), var(--asphalt));}
+  .strip .panel.rec{background:linear-gradient(135deg, var(--asphalt-2), var(--asphalt));border-color:var(--line);}
+  .strip h3{font-size:20px;margin-bottom:10px;}
+  .strip p{color:var(--concrete-dim);font-size:14px;line-height:1.55;margin:0 0 20px;}
+
+  /* ===== ABOUT / CONTACT ===== */
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:40px;}
+  .fases{display:flex;flex-direction:column;gap:14px;}
+  .fase{
+    display:flex;gap:16px;align-items:flex-start;padding:16px;border:1px solid var(--line);border-radius:6px;background:var(--asphalt);
+  }
+  .fase .ftag{
+    font-family:'IBM Plex Mono';font-size:11px;font-weight:700;color:var(--asphalt);
+    background:var(--yellow);padding:4px 8px;border-radius:3px;white-space:nowrap;margin-top:2px;
+  }
+  .fase.locked .ftag{background:var(--asphalt-3);color:var(--concrete-dim);}
+  .fase h4{font-size:14px;margin:0 0 4px;}
+  .fase p{font-size:13px;color:var(--concrete-dim);margin:0;}
+
+  .contact-card{
+    background:var(--asphalt);border:1px solid var(--line);border-radius:8px;padding:30px;
+  }
+  .contact-row{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-size:14px;}
+  .contact-row svg{width:18px;height:18px;stroke:var(--orange);flex-shrink:0;}
+
+  footer{
+    border-top:1px solid var(--line);padding:32px 0;background:var(--asphalt);
+  }
+  .footer-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--concrete-dim);flex-wrap:wrap;gap:12px;}
+
+  /* ===== MODAL (perfil) ===== */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(10,9,8,0.72);
+    display:none;align-items:center;justify-content:center;z-index:200;padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--asphalt-2);border:1px solid var(--line);border-radius:10px;
+    max-width:460px;width:100%;padding:32px;position:relative;
+    box-shadow:0 30px 70px rgba(0,0,0,0.6);
+  }
+  .modal-close{
+    position:absolute;top:18px;right:18px;background:none;border:none;color:var(--concrete-dim);
+    font-size:22px;cursor:pointer;line-height:1;
+  }
+  .modal-close:hover{color:var(--orange);}
+  .modal .avatar{width:64px;height:64px;font-size:22px;margin-bottom:16px;}
+  .modal h3{font-size:22px;margin-bottom:2px;}
+  .modal .role{color:var(--orange);font-weight:700;font-size:13px;text-transform:uppercase;margin-bottom:18px;}
+  .modal-section{margin-bottom:18px;}
+  .modal-section label{font-family:'IBM Plex Mono';font-size:11px;color:var(--concrete-dim);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;}
+  .modal-section p{margin:0;font-size:14px;line-height:1.5;}
+  .modal-grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .modal-actions{display:flex;gap:10px;margin-top:24px;}
+  .modal-actions .btn{flex:1;justify-content:center;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--yellow);color:var(--asphalt);font-weight:700;font-size:13px;
+    padding:13px 22px;border-radius:6px;opacity:0;transition:all .25s;z-index:300;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width:900px){
+    nav.links{display:none;}
+    .nav-toggle{display:inline-flex;}
+    .hero-grid{grid-template-columns:1fr;}
+    .ticket-stack{height:260px;margin-top:20px;}
+    .ticket-demo{width:260px;}
+    .steps{grid-template-columns:1fr;}
+    .oficios-grid{grid-template-columns:repeat(3,1fr);}
+    .cards-grid{grid-template-columns:1fr 1fr;}
+    .strip{grid-template-columns:1fr;}
+    .about-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:600px){
+    .oficios-grid{grid-template-columns:repeat(2,1fr);}
+    .cards-grid{grid-template-columns:1fr;}
+    .filters{flex-direction:column;align-items:stretch;}
+    .field{min-width:0;}
+    .hero{padding:56px 0 48px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; scroll-behavior:auto !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="navbar">
+    <a href="#home" class="logo">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFC600" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      OFICIOYA
+      <span class="badge mono">MVP</span>
+    </a>
+    <nav class="links">
+      <a href="#buscador">Buscador de talento</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#nosotros">Acerca de nosotros</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">☰</button>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="home">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Perú · Reclutamiento operativo</span>
+      <h1>Encuentra trabajadores<br><span>operativos</span> rápido.</h1>
+      <p class="sub">OficioYa conecta a reclutadores con trabajadores disponibles — electricistas, soldadores, operarios y más — en minutos, no en días.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://forms.gle/KGnTCNz2rvpsfhfg9" target="_blank" rel="noopener">👷 Soy trabajador</a>
+        <a class="btn btn-secondary" href="#buscador">🏢 Soy reclutador</a>
+      </div>
+    </div>
+    <div class="ticket-stack">
+      <div class="ticket-demo back">
+        <div class="row1">
+          <div class="avatar">CM</div>
+          <span class="stamp mono">Esta semana</span>
+        </div>
+        <h4>Carlos Medina</h4>
+        <div class="role">Operario</div>
+        <div class="ticket-meta"><span>📍 Arequipa</span><span>⭐ 3 años</span></div>
+      </div>
+      <div class="ticket-demo front">
+        <div class="row1">
+          <div class="avatar" style="background:var(--orange);color:var(--asphalt);">JP</div>
+          <span class="stamp mono">Disponible ahora</span>
+        </div>
+        <h4>Juan Pérez</h4>
+        <div class="role">Electricista</div>
+        <div class="ticket-meta"><span>📍 Lima</span><span>⭐ 5 años</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hazard"></div>
+
+<!-- ===== COMO FUNCIONA ===== -->
+<section class="section" id="como-funciona">
+  <div class="wrap">
+    <span class="section-tag mono">// Cómo funciona</span>
+    <h2>Tres pasos, sin vueltas.</h2>
+    <p class="lead">Pensado para que un trabajador se registre desde su celular y un reclutador encuentre a alguien disponible en el mismo día.</p>
+    <div class="steps">
+      <div class="step">
+        <span class="num mono">PASO 01</span>
+        <h3>Regístrate</h3>
+        <p>Completa tu perfil con oficio, ciudad y disponibilidad en un formulario de 2 minutos.</p>
+      </div>
+      <div class="step">
+        <span class="num mono">PASO 02</span>
+        <h3>Completa tu perfil</h3>
+        <p>Suma experiencia, tipo de trabajo que buscas y documentos opcionales para destacar.</p>
+      </div>
+      <div class="step">
+        <span class="num mono">PASO 03</span>
+        <h3>Conecta</h3>
+        <p>Los reclutadores te encuentran filtrando por oficio y ciudad, y te contactan directo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== OFICIOS POPULARES ===== -->
+<section class="section alt">
+  <div class="wrap">
+    <span class="section-tag mono">// Oficios populares</span>
+    <h2>Cubrimos los oficios que mueven obra.</h2>
+    <div class="oficios-grid" id="oficiosGrid"></div>
+  </div>
+</section>
+
+<!-- ===== BUSCADOR ===== -->
+<section class="section" id="buscador">
+  <div class="wrap">
+    <span class="section-tag mono">// Buscador de talento</span>
+    <h2>Resultados filtrados, no hojas de cálculo.</h2>
+    <p class="lead">Filtra por oficio, ciudad, disponibilidad y experiencia. Cada tarjeta es un trabajador listo para ser contactado.</p>
+
+    <div class="filters">
+      <div class="field">
+        <label class="mono">Oficio</label>
+        <select id="fOficio"><option value="">Todos</option></select>
+      </div>
+      <div class="field">
+        <label class="mono">Ciudad</label>
+        <select id="fCiudad"><option value="">Todas</option></select>
+      </div>
+      <div class="field">
+        <label class="mono">Disponibilidad</label>
+        <select id="fDisp">
+          <option value="">Todas</option>
+          <option value="now">Disponible ahora</option>
+          <option value="week">Esta semana</option>
+          <option value="later">Próxima semana</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="mono">Experiencia mínima</label>
+        <select id="fExp">
+          <option value="0">Cualquiera</option>
+          <option value="1">1+ año</option>
+          <option value="3">3+ años</option>
+          <option value="5">5+ años</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="btnBuscar">🔍 Buscar</button>
+    </div>
+
+    <div class="results-meta">
+      <span class="results-count mono">Mostrando <b id="resultCount">0</b> trabajadores</span>
+      <span class="results-count mono" id="resultFilters"></span>
+    </div>
+
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+</section>
+
+<!-- ===== CTA STRIP ===== -->
+<section class="section alt">
+  <div class="wrap">
+    <div class="strip">
+      <div class="panel work">
+        <h3>👷 ¿Buscas trabajo?</h3>
+        <p>Regístrate gratis y aparece ante reclutadores que necesitan tu oficio esta semana.</p>
+        <a class="btn btn-primary" href="https://forms.gle/KGnTCNz2rvpsfhfg9" target="_blank" rel="noopener">Registrarme como trabajador</a>
+      </div>
+      <div class="panel rec">
+        <h3>🏢 ¿Necesitas personal?</h3>
+        <p>Publica tu vacante y recibe acceso a perfiles filtrados por ciudad y experiencia.</p>
+        <a class="btn btn-ghost" href="https://forms.gle/UnBwsSdNDyBty2r57" target="_blank" rel="noopener">Registrarme como reclutador</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ACERCA / FASES ===== -->
+<section class="section" id="nosotros">
+  <div class="wrap">
+    <span class="section-tag mono">// Acerca de nosotros</span>
+    <h2>Construyendo OficioYa por fases.</h2>
+    <div class="about-grid">
+      <div class="fases">
+        <div class="fase">
+          <span class="ftag mono">FASE 1</span>
+          <div><h4>MVP</h4><p>Registro vía formulario, buscador con filtros y tarjetas de contacto directo.</p></div>
+        </div>
+        <div class="fase locked">
+          <span class="ftag mono">FASE 2</span>
+          <div><h4>Validación de identidad</h4><p>Verificación de DNI y sistema de calificaciones entre trabajadores y reclutadores.</p></div>
+        </div>
+        <div class="fase locked">
+          <span class="ftag mono">FASE 3</span>
+          <div><h4>IA y versión Pro</h4><p>Matching inteligente entre vacantes y perfiles, más herramientas para reclutadores.</p></div>
+        </div>
+      </div>
+      <div>
+        <p class="lead" style="margin-bottom:20px;">Los reclutadores necesitan cubrir vacantes rápido y hoy no cuentan con una base de trabajadores filtrada y disponible. OficioYa resuelve eso conectando ambos lados directamente.</p>
+        <p class="lead">Trabajadores operativos de 18 a 50 años, y reclutadores o empresas que buscan personal de forma ágil — esa es la conexión que hacemos posible.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACTO ===== -->
+<section class="section alt" id="contacto">
+  <div class="wrap">
+    <span class="section-tag mono">// Contacto</span>
+    <h2>¿Tienes preguntas?</h2>
+    <div class="contact-card" style="margin-top:32px;max-width:480px;">
+      <div class="contact-row"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"/></svg> sobrinuts@gmail.com</div>
+      <div class="contact-row"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> +51 936-161-376</div>
+      <div class="contact-row"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Lima, Perú</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>© 2026 OficioYa — Prototipo de producto (MVP)</span>
+    <span class="mono">Datos: Google Sheets · Integración: Apps Script · Hosting: Vercel</span>
+  </div>
+</footer>
+
+<!-- ===== MODAL PERFIL ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- ICONOS POR OFICIO ----------
+const icons = {
+  "Electricista": '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>',
+  "Soldador": '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 21l6-6m0 0 9-9 3 3-9 9-3-3z"/><path d="M14 7l3 3"/></svg>',
+  "Conductor": '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 17h14M5 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM15 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM3 17V9l2-5h10l4 5h2v8"/></svg>',
+  "Operario": '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="9" width="18" height="11" rx="1"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg>',
+  "Técnico": '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  "Limpieza": '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 21l9-9M15.5 5.5l3 3L9 18l-4 1 1-4 9.5-9.5z"/></svg>'
+};
+
+// ---------- API REAL (Google Apps Script conectado a tus Sheets) ----------
+const API_URL = 'https://script.google.com/macros/s/AKfycbzveB1pR_LaZ-tvRRAVUC5ure9sRIak4hqebeNmps4s2QDLkFRrizhbBp6Vq3LV-LzGHg/exec';
+
+// Respaldo: solo se usa si la API no responde (ej. sin internet, script caído)
+const trabajadoresRespaldo = [
+  {nombre:"Juan Pérez", oficio:"Electricista", ciudad:"Lima", exp:5, disp:"now", iniciales:"JP", tel:"+51 987 111 222", desc:"Instalaciones residenciales y comerciales, tableros y mantenimiento preventivo."},
+  {nombre:"Carlos Medina", oficio:"Operario", ciudad:"Arequipa", exp:3, disp:"week", iniciales:"CM", tel:"+51 987 222 333", desc:"Operario de obra civil, manejo de mezcladora y andamios certificados."},
+  {nombre:"Rosa Quispe", oficio:"Soldador", ciudad:"Trujillo", exp:7, disp:"now", iniciales:"RQ", tel:"+51 987 333 444", desc:"Soldadura MIG/TIG para estructuras metálicas industriales."}
+];
+
+let trabajadores = []; // se llena con los datos reales al cargar la página
+
+// Convierte un registro de la API (nombres en español, distintas claves)
+// al formato interno que usan las tarjetas: nombre, oficio, ciudad, exp, disp, iniciales, tel, desc
+function mapearDesdeAPI(t){
+  const ini = ((t.nombres||'').trim()[0]||'') + ((t.apellidos||'').trim()[0]||'');
+  return {
+    nombre: t.nombreCompleto || `${t.nombres||''} ${t.apellidos||''}`.trim(),
+    oficio: t.oficio || 'Sin oficio',
+    ciudad: t.ciudad || 'Sin ciudad',
+    exp: t.experienciaAnios || 0,
+    disp: ['now','week','later'].includes(t.disponibilidad) ? t.disponibilidad : 'week',
+    iniciales: ini.toUpperCase() || '??',
+    tel: (t.telefono || t.teléfono || '').toString(),
+    desc: t.descripcion || 'Sin descripción de experiencia.'
+  };
+}
+
+async function cargarTrabajadores(){
+  try{
+    const res = await fetch(`${API_URL}?tipo=trabajador`);
+    if(!res.ok) throw new Error('Respuesta no OK de la API');
+    const json = await res.json();
+    if(!json.ok || !Array.isArray(json.data)) throw new Error('Formato inesperado');
+    trabajadores = json.data.map(mapearDesdeAPI);
+    if(trabajadores.length === 0){
+      showToast('Aún no hay trabajadores registrados que acepten ser visibles');
+    }
+  }catch(err){
+    console.error('No se pudo cargar la API, usando datos de respaldo:', err);
+    trabajadores = trabajadoresRespaldo;
+    showToast('No se pudo conectar con la base de datos — mostrando datos de ejemplo');
+  }
+  inicializarUI();
+}
+
+const dispLabel = { now:"Disponible ahora", week:"Esta semana", later:"Próxima semana" };
+const dispClass = { now:"now", week:"week", later:"later" };
+
+const oficiosGrid = document.getElementById('oficiosGrid');
+const fOficio = document.getElementById('fOficio');
+const fCiudad = document.getElementById('fCiudad');
+const cardsGrid = document.getElementById('cardsGrid');
+const resultCount = document.getElementById('resultCount');
+const resultFilters = document.getElementById('resultFilters');
+
+// Se ejecuta una vez que ya tenemos datos (reales o de respaldo)
+function inicializarUI(){
+  // Oficios populares
+  oficiosGrid.innerHTML = '';
+  [...new Set(trabajadores.map(t=>t.oficio))].forEach(of=>{
+    const div = document.createElement('div');
+    div.className = 'oficio-chip';
+    div.innerHTML = (icons[of]||'') + `<span>${of}</span>`;
+    oficiosGrid.appendChild(div);
+  });
+
+  // Filtros
+  fOficio.innerHTML = '<option value="">Todos</option>';
+  fCiudad.innerHTML = '<option value="">Todas</option>';
+  [...new Set(trabajadores.map(t=>t.oficio))].sort().forEach(o=>{
+    fOficio.innerHTML += `<option value="${o}">${o}</option>`;
+  });
+  [...new Set(trabajadores.map(t=>t.ciudad))].sort().forEach(c=>{
+    fCiudad.innerHTML += `<option value="${c}">${c}</option>`;
+  });
+
+  render(trabajadores);
+  resultFilters.textContent = 'Sin filtros aplicados';
+}
+
+function render(list){
+  cardsGrid.innerHTML = '';
+  resultCount.textContent = list.length;
+  if(list.length === 0){
+    cardsGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Sin resultados — ajusta tus filtros, no hay trabajadores con esa combinación todavía.</div>`;
+    return;
+  }
+  list.forEach((t, idx)=>{
+    const realIndex = trabajadores.indexOf(t);
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="card-id">
+          <div class="avatar">${t.iniciales}</div>
+          <div>
+            <h4>${t.nombre}</h4>
+            <div class="role">${t.oficio}</div>
+          </div>
+        </div>
+        <span class="avail ${dispClass[t.disp]} mono">${dispLabel[t.disp]}</span>
+      </div>
+      <div class="card-meta">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ${t.ciudad}</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polygon points="12 2 15 8.5 22 9.3 17 14 18.2 21 12 17.5 5.8 21 7 14 2 9.3 9 8.5"/></svg> ${t.exp} años de experiencia</div>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-sm-outline" data-perfil="${realIndex}">Ver perfil</button>
+        <button class="btn btn-primary" data-contactar="${realIndex}">Contactar</button>
+      </div>
+    `;
+    cardsGrid.appendChild(card);
+  });
+}
+
+function applyFilters(){
+  const oficio = fOficio.value, ciudad = fCiudad.value;
+  const disp = document.getElementById('fDisp').value;
+  const expMin = parseInt(document.getElementById('fExp').value, 10);
+  const filtered = trabajadores.filter(t=>
+    (!oficio || t.oficio===oficio) &&
+    (!ciudad || t.ciudad===ciudad) &&
+    (!disp || t.disp===disp) &&
+    (t.exp >= expMin)
+  );
+  const activeFilters = [oficio, ciudad, disp ? dispLabel[disp]:'', expMin>0?expMin+'+ años':''].filter(Boolean);
+  resultFilters.textContent = activeFilters.length ? activeFilters.join(' · ') : 'Sin filtros aplicados';
+  render(filtered);
+}
+
+document.getElementById('btnBuscar').addEventListener('click', applyFilters);
+[fOficio, fCiudad, document.getElementById('fDisp'), document.getElementById('fExp')].forEach(el=>{
+  el.addEventListener('change', applyFilters);
+});
+
+// ---------- MODAL PERFIL ----------
+const overlay = document.getElementById('modalOverlay');
+const modalContent = document.getElementById('modalContent');
+
+function openPerfil(t){
+  modalContent.innerHTML = `
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div class="avatar">${t.iniciales}</div>
+    <h3>${t.nombre}</h3>
+    <div class="role">${t.oficio}</div>
+    <div class="modal-section">
+      <label class="mono">Experiencia</label>
+      <p>${t.desc}</p>
+    </div>
+    <div class="modal-grid2">
+      <div class="modal-section">
+        <label class="mono">Ciudad</label>
+        <p>${t.ciudad}</p>
+      </div>
+      <div class="modal-section">
+        <label class="mono">Años de experiencia</label>
+        <p>${t.exp} años</p>
+      </div>
+    </div>
+    <div class="modal-section">
+      <label class="mono">Disponibilidad</label>
+      <p><span class="avail ${dispClass[t.disp]} mono">${dispLabel[t.disp]}</span></p>
+    </div>
+    <div class="modal-actions">
+      <a class="btn btn-primary" style="flex:1;" href="tel:${t.tel.replace(/\s/g,'')}">📞 Llamar</a>
+      <button class="btn btn-ghost" id="modalCerrar">Cerrar</button>
+    </div>
+  `;
+  overlay.classList.add('open');
+  document.getElementById('modalClose').onclick = closePerfil;
+  document.getElementById('modalCerrar').onclick = closePerfil;
+}
+function closePerfil(){ overlay.classList.remove('open'); }
+overlay.addEventListener('click', e=>{ if(e.target===overlay) closePerfil(); });
+
+cardsGrid.addEventListener('click', e=>{
+  const perfilBtn = e.target.closest('[data-perfil]');
+  const contactarBtn = e.target.closest('[data-contactar]');
+  if(perfilBtn){
+    openPerfil(trabajadores[perfilBtn.dataset.perfil]);
+  }
+  if(contactarBtn){
+    openPerfil(trabajadores[contactarBtn.dataset.contactar]);
+    showToast('Perfil abierto — datos de contacto disponibles abajo');
+  }
+});
+
+// ---------- TOAST ----------
+const toast = document.getElementById('toast');
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>toast.classList.remove('show'), 2600);
+}
+
+// ---------- NAV TOGGLE MOBILE ----------
+document.getElementById('navToggle').addEventListener('click', ()=>{
+  const links = document.querySelector('nav.links');
+  const isOpen = links.style.display === 'flex';
+  links.style.display = isOpen ? 'none' : 'flex';
+  links.style.flexDirection = 'column';
+  links.style.position = 'absolute';
+  links.style.top = '64px';
+  links.style.right = '20px';
+  links.style.background = 'var(--asphalt-2)';
+  links.style.border = '1px solid var(--line)';
+  links.style.borderRadius = '6px';
+  links.style.padding = '16px 22px';
+  links.style.gap = '16px';
+});
+
+// ---------- ARRANQUE: carga datos reales desde la API al abrir la página ----------
+cargarTrabajadores();
+
+</script>
+
+</body>
+</html>
